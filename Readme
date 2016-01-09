@@ -1,0 +1,44 @@
+                                  ┌──────────┒
+                                  │   fsos   ┃
+                                  ┕━━━━┯━━━━━┛
+                                       │
+                        ╭──────────────┴───────────────╮
+                        │ A file system object storage │
+                        ╰──────────────────────────────╯
+
+File system IO can be hard to get right. This library offers a simpler interface
+to common operations expected from an object storage. It stays as close to the
+file system as humanly possible.
+
+    var fsos = require('fsos')
+    var user = { nick: 'jade', firstName: 'Jackie', lastName: 'Dent'}
+    fsos.set('user/' + user.nick, JSON.stringify(user)).then(function() {
+      fsos.get('user/' + user.nick).then(function(value) {
+        console.log(value)
+      })
+    })
+
+If an object is set successfully, all subsequent gets will return the value that
+was set until the object is reset.
+
+If an object is set non-successfully, all subsequent gets will return the value
+it had prior, if any, until the object is reset.
+
+It should stay consistent even if the application crashes. If the system
+crashes, it is likely to stay consistent, but that depends on the file system.
+
+# API
+
+set(key, value) → Promise
+
+Sets the value at that key. It is stored directly on a file (treating the key as
+a path).
+The value can be a Buffer, a String, or a JSON-serializable object.
+
+get(key) → Promise<Buffer>
+
+Reads the value at that key. Yields an error if the key does not exist.
+
+delete(key) → Promise
+
+Ensures that a subsequent get yields an error.
