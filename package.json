@@ -1,0 +1,21 @@
+{
+  "name": "fsos",
+  "version": "0.0.1",
+  "description": "A file system object storage.",
+  "keywords": ["file", "object storage"],
+  "bugs": {
+    "url": "https://github.com/espadrine/fsos/issues",
+    "email": "thaddee.tyl@gmail.com"
+  },
+  "license": "MIT",
+  "author": "Thaddée Tyl <thaddee.tyl@gmail.com>",
+  "main": "main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/espadrine/fsos"
+  },
+  "dependencies": {
+    "promise": "~7.0.4"
+  },
+  "engines": { "node": ">=4.2.2" }
+}
