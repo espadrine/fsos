@@ -24,8 +24,9 @@ was set until the object is reset.
 If an object is set non-successfully, all subsequent gets will return the value
 it had prior, if any, until the object is reset.
 
-It should stay consistent even if the application crashes. If the system
-crashes, it is likely to stay consistent, but that depends on the file system.
+It should stay consistent even if the application crashes or if multiple
+processes write to the same files. If the system crashes, it is likely to stay
+consistent, but that depends on the file system.
 
 # API
 
@@ -42,3 +43,9 @@ Reads the value at that key. Yields an error if the key does not exist.
 delete(key) → Promise
 
 Ensures that a subsequent get yields an error.
+
+# Notes
+
+exists (to get a boolean describing whether there is data at a key) is left out.
+Indeed, that information does not guarantee that there will be data at that key
+for your next operation, as other processes may have modified it.
