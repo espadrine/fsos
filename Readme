@@ -13,9 +13,9 @@ file system as humanly possible.
     var fsos = require('fsos')
     var user = { nick: 'jade', firstName: 'Jackie', lastName: 'Dent'}
     fsos.set('user/' + user.nick, JSON.stringify(user)).then(function() {
-      fsos.get('user/' + user.nick).then(function(value) {
-        console.log(value)
-      })
+      return fsos.get('user/' + user.nick)
+    }).then(function(value) {
+      console.log(value)
     })
 
 If an object is set successfully, all subsequent gets will return the value that
