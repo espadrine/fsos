@@ -1,6 +1,6 @@
 {
   "name": "fsos",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A file system object storage.",
   "keywords": ["file", "object storage"],
   "bugs": {
