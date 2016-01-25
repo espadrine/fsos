@@ -2,14 +2,29 @@ var fs = require('fs');
 var path = require('path');
 var Promise = require('promise');
 
-function get(key, value) {
-  return new Promise(function(resolve, reject) {
-    fs.readFile(key, function(err, data) {
-      if (err != null) { reject(err); return; }
-      resolve(data);
+function promisify(func) {
+  return function() {
+    var _this = this;
+    var args = Array.prototype.slice.call(arguments, 0);
+    // Note: "this" is extracted from this scope.
+    return new Promise(function (accept, reject) {
+      // Add the callback function to the list of args
+      args.push(function (err) {
+        var rest = Array.prototype.slice.call(arguments, 1);
+        console.log('in promisified func\n', err, rest);
+        if (typeof err !== 'undefined' && err !== null) {
+          return reject(err);
+        }
+        return accept(rest.length === 1 ? rest[0] : rest);
+      });
+      // Call the callback-based function
+      func.apply(_this, args);
     });
-  });
+  };
 }
+
+var pReadFile = promisify(fs.readFile);
+var get = pReadFile;
 
 var MAX = 4294967296;
 function randFileName(dir) {
@@ -24,21 +39,25 @@ function randFileName(dir) {
   });
 }
 
+var pWriteFile = promisify(fs.writeFile);
+var pRename = promisify(fs.rename);
+
 function set(key, value) {
   return new Promise(function(resolve, reject) {
     // FIXME: read (and set the tmp file to) the file's permissions.
     var dir = path.dirname(key);
+    var filename;
     randFileName(dir).then(function(tmp) {
-      // FIXME: retry if the file alreay exists.
-      fs.writeFile(tmp, value, {flag:'ax'}, function(err) {
-        if (err != null) { reject(err); return; }
-        fs.rename(tmp, key, function(err) {
-          if (err != null) { reject(err); return; }
-          // FIXME: fsync.
-          resolve();
-        });
-      });
-    }).catch(function(e) { reject(e); });
+      // FIXME: retry if the file already exists.
+      filename = tmp;
+      return pWriteFile(tmp, value, {flag:'ax'});
+    }).then(function() {
+      return pRename(filename, key);
+    }).then(function() {
+      // FIXME: fsync.
+      // Ensure we don't call resolve with a non-null argument.
+      resolve();
+    }).catch(reject);
   });
 }
 
