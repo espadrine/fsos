@@ -38,20 +38,24 @@ function randFileName(dir) {
   });
 }
 
+var pStat = promisify(fs.stat);
 var pWriteFile = promisify(fs.writeFile);
 var pRename = promisify(fs.rename);
 
 function set(key, value) {
   return new Promise(function(resolve, reject) {
-    // FIXME: read (and set the tmp file to) the file's permissions.
     var dir = path.dirname(key);
-    var filename;
-    randFileName(dir).then(function(tmp) {
+    var tmpname;
+    var mode;
+    pStat(key).then(function(stats) {
+      mode = stats.mode;
+      return randFileName(dir);
+    }).then(function(tmp) {
       // FIXME: retry if the file already exists.
-      filename = tmp;
-      return pWriteFile(tmp, value, {flag:'ax'});
+      tmpname = tmp;
+      return pWriteFile(tmp, value, {flag:'ax', mode:mode});
     }).then(function() {
-      return pRename(filename, key);
+      return pRename(tmpname, key);
     }).then(function() {
       // FIXME: fsync.
       // Ensure we don't call resolve with a non-null argument.
