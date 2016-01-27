@@ -11,8 +11,7 @@ function promisify(func) {
       // Add the callback function to the list of args
       args.push(function (err) {
         var rest = Array.prototype.slice.call(arguments, 1);
-        console.log('in promisified func\n', err, rest);
-        if (typeof err !== 'undefined' && err !== null) {
+        if (err !== null) {
           return reject(err);
         }
         return accept(rest.length === 1 ? rest[0] : rest);
