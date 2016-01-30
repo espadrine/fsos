@@ -25,6 +25,9 @@ function promisify(func) {
 var pReadFile = promisify(fs.readFile);
 var get = pReadFile;
 
+var pUnlink = promisify(fs.unlink);
+var del = pUnlink;
+
 var MAX = 4294967296;
 function randFileName(dir) {
   return new Promise(function(resolve, reject) {
@@ -66,3 +69,4 @@ function set(key, value) {
 
 exports.get = get;
 exports.set = set;
+exports.delete = del;
