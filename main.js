@@ -1,5 +1,6 @@
 var fs = require('fs');
 var path = require('path');
+var constants = require('constants');
 var Promise = require('promise');
 
 function promisify(func) {
@@ -41,14 +42,18 @@ function randFileName(dir) {
   });
 }
 
+var pOpen = promisify(fs.open);
+var pClose = promisify(fs.close);
 var pStat = promisify(fs.stat);
-var pWriteFile = promisify(fs.writeFile);
+var pWrite = promisify(fs.write);
 var pRename = promisify(fs.rename);
+var pFsync = promisify(fs.fsync);
 
 function set(key, value) {
   return new Promise(function(resolve, reject) {
     var dir = path.dirname(key);
     var tmpname;
+    var fd;
     var mode;
     pStat(key).then(function(stats) {
       mode = stats.mode;
@@ -56,11 +61,27 @@ function set(key, value) {
     }).then(function(tmp) {
       // FIXME: retry if the file already exists.
       tmpname = tmp;
-      return pWriteFile(tmp, value, {flag:'ax', mode:mode});
+      return pOpen(tmpname,
+        constants.O_WRONLY | constants.O_EXCL | constants.O_CREAT,
+        mode);
+    }).then(function(fileDescriptor) {
+      fd = fileDescriptor;
+      return pWrite(fd, value);
+    }).then(function() {
+      return pFsync(fd);
+    }).then(function() {
+      return pClose(fd);
     }).then(function() {
       return pRename(tmpname, key);
     }).then(function() {
-      // FIXME: fsync.
+      // Fsync the file's directory.
+      return pOpen(path.dirname(key), constants.O_RDONLY);
+    }).then(function(fileDescriptor) {
+      fd = fileDescriptor;
+      return pFsync(fd);
+    }).then(function() {
+      return pClose(fd);
+    }).then(function() {
       // Ensure we don't call resolve with a non-null argument.
       resolve();
     }).catch(reject);
