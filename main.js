@@ -58,6 +58,13 @@ function set(key, value) {
     pStat(key).then(function(stats) {
       mode = stats.mode;
       return randFileName(dir);
+    }).catch(function(e) {
+      if (e.code === 'ENOENT') {
+        mode = 0666;
+        return randFileName(dir);
+      } else {
+        throw e;
+      }
     }).then(function(tmp) {
       // FIXME: retry if the file already exists.
       tmpname = tmp;
