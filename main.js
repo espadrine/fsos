@@ -27,7 +27,18 @@ var pReadFile = promisify(fs.readFile);
 var get = pReadFile;
 
 var pUnlink = promisify(fs.unlink);
-var del = pUnlink;
+
+function del(key) {
+  return new Promise(function(resolve, reject) {
+    pUnlink(key).then(function() {
+      // Ensure we don't call resolve with a non-null argument.
+      resolve();
+    }).catch(function(e) {
+      if (e.code === 'ENOENT') { resolve(); }
+      else { reject(e); }
+    });
+  });
+}
 
 var MAX = 4294967296;
 function randFileName(dir) {

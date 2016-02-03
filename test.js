@@ -38,4 +38,8 @@ fsos.set(testFile, 'hello')
   thrownCount++;
 }).then(function() {
   assert.equal(thrownCount, 1);
-}).catch(assertPromiseNotThrown);
+}).catch(assertPromiseNotThrown)
+
+.then(function() {
+  console.log('done');
+});
