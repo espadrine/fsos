@@ -1,5 +1,6 @@
 var fs = require('fs');
 var path = require('path');
+var crypto = require('crypto');
 var constants = require('constants');
 var Promise = require('promise');
 
@@ -40,15 +41,14 @@ function del(key) {
   });
 }
 
-var MAX = 4294967296;
+function base64url(str) {
+  return str.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
 function randFileName(dir) {
   return new Promise(function(resolve, reject) {
-    // Note: this may not be very random, potentially causing collisions in some
-    // workloads.
-    var rand = '' + ((Math.random() * MAX) >>> 0) +
-      ((Math.random() * MAX) >>> 0) +
-      ((Math.random() * MAX) >>> 0) +
-      ((Math.random() * MAX) >>> 0);
+    // A UUID is a 128-bit value, so it is equivalent to 16 bytes.
+    var rand128 = crypto.randomBytes(16);
+    var rand = base64url(rand128.toString('base64'));
     resolve(path.join(dir, rand));
   });
 }
