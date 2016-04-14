@@ -1,6 +1,6 @@
 {
   "name": "fsos",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A file system object storage.",
   "keywords": ["file", "object storage"],
   "bugs": {
@@ -20,5 +20,5 @@
   "dependencies": {
     "promise": "~7.0.4"
   },
-  "engines": { "node": ">=4.2.2" }
+  "engines": { "node": ">=4.1.1" }
 }
