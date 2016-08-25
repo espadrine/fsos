@@ -2,6 +2,7 @@ var fs = require('fs');
 var path = require('path');
 var crypto = require('crypto');
 var constants = require('constants');
+var mkdirp = require('mkdirp-then');
 var Promise = require('promise');
 
 function promisify(func) {
@@ -59,14 +60,25 @@ var pStat = promisify(fs.stat);
 var pWrite = promisify(fs.write);
 var pRename = promisify(fs.rename);
 var pFsync = promisify(fs.fsync);
+var prmdir = promisify(fs.rmdir);
 
-function set(key, value) {
+function set(key, value, options) {
   return new Promise(function(resolve, reject) {
+    options = options || {}
     var dir = path.dirname(key);
+    var noMkdir = !!options.noMkdir;
     var tmpname;
     var fd;
     var mode;
-    pStat(key).then(function(stats) {
+    var automakeDir;
+    if (!noMkdir) {
+      automakeDir = mkdirp(dir);
+    } else {
+      automakeDir = Promise.resolve();
+    }
+    automakeDir.then(function() {
+      return pStat(key);
+    }).then(function(stats) {
       mode = stats.mode;
       return randFileName(dir);
     }).catch(function(e) {
@@ -109,3 +121,4 @@ function set(key, value) {
 exports.get = get;
 exports.set = set;
 exports.delete = del;
+exports.deleteDir = prmdir;  // Non-public

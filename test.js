@@ -1,6 +1,7 @@
 var assert = require('assert');
 var fsos = require('.');
 var fs = require('fs');
+var path = require('path');
 
 var thrownCount = 0;
 var assertPromiseNotThrown = function(e) {
@@ -10,6 +11,7 @@ var assertPromiseNotThrown = function(e) {
 
 // Test with new file.
 var testFile = 'test-1';
+var testDir = 'test-dir';
 try { fs.unlinkSync(testFile); } catch(_) {}
 
 fsos.set(testFile, 'hello')
@@ -28,16 +30,34 @@ fsos.set(testFile, 'hello')
   assert.equal(''+val, 'hi');
 }).catch(assertPromiseNotThrown)
 
-// Test deletion.
+// Test without directory autocreation.
 .then(function() {
-  return fsos.delete(testFile);
+  return fsos.set(path.join(testDir, testFile), 'hi', {noMkdir: true});
+}).catch(function(e) {
+  assert.equal(e.code, 'ENOENT');
+  thrownCount++;
+})
+
+// Test with directory autocreation.
+.then(function() {
+  return fsos.set(path.join(testDir, testFile), 'hi');
 }).then(function() {
+  return fsos.get(path.join(testDir, testFile));
+}).then(function(val) {
+  assert.equal(''+val, 'hi');
+}).catch(assertPromiseNotThrown)
+
+// Test deletion.
+.then(function() { return fsos.delete(testFile); })
+.then(function() { return fsos.delete(path.join(testDir, testFile)); })
+.then(function() { return fsos.deleteDir(testDir); })
+.then(function() {
   return fsos.get(testFile);
 }).catch(function(e) {
   assert.equal(e.code, 'ENOENT');
   thrownCount++;
 }).then(function() {
-  assert.equal(thrownCount, 1);
+  assert.equal(thrownCount, 2);
 }).catch(assertPromiseNotThrown)
 
 .then(function() {
