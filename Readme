@@ -33,7 +33,7 @@ consistent, but that depends on the file system.
 set(key, value) → Promise
 
 Sets the value at that key. It is stored directly on a file (treating the key as
-a path).
+a path, automatically creating folders as needed).
 The value can be a Buffer, a String, or a JSON-serializable object.
 
 get(key) → Promise<Buffer>
