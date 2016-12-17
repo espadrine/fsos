@@ -50,7 +50,7 @@ function randFileName(dir) {
     // A UUID is a 128-bit value, so it is equivalent to 16 bytes.
     var rand128 = crypto.randomBytes(16);
     var rand = base64url(rand128.toString('base64'));
-    resolve(path.join(dir, rand));
+    resolve(path.join(dir, '.' + rand));
   });
 }
 
