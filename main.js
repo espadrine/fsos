@@ -82,7 +82,7 @@ function set(key, value, options) {
       return randFileName(dir);
     }).catch(function(e) {
       if (e.code === 'ENOENT') {
-        mode = 0666;
+        mode = 0x1b6;  // 0b110110110 aka. read/write.
         return randFileName(dir);
       } else {
         throw e;
