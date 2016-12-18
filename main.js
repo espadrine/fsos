@@ -1,3 +1,4 @@
+'use strict';
 var fs = require('fs');
 var path = require('path');
 var crypto = require('crypto');
@@ -7,20 +8,18 @@ var Promise = require('promise');
 
 function promisify(func) {
   return function() {
-    var _this = this;
+    var self = this;
     var args = Array.prototype.slice.call(arguments, 0);
     // Note: "this" is extracted from this scope.
-    return new Promise(function (accept, reject) {
+    return new Promise(function (resolve, reject) {
       // Add the callback function to the list of args
       args.push(function (err) {
+        if (err !== null) { return reject(err); }
         var rest = Array.prototype.slice.call(arguments, 1);
-        if (err !== null) {
-          return reject(err);
-        }
-        return accept(rest.length === 1 ? rest[0] : rest);
+        return resolve(rest.length === 1 ? rest[0] : rest);
       });
       // Call the callback-based function
-      func.apply(_this, args);
+      func.apply(self, args);
     });
   };
 }
