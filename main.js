@@ -102,6 +102,9 @@ function set(key, value, options) {
       return pClose(fd);
     }).then(function() {
       return pRename(tmpname, key);
+    }).catch(function(e) {
+      pUnlink(tmpname);
+      throw e;
     }).then(function() {
       // Fsync the file's directory.
       return pOpen(path.dirname(key), constants.O_RDONLY);
