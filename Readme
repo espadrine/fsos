@@ -35,6 +35,7 @@ set(key, value) → Promise
 Sets the value at that key. It is stored directly on a file (treating the key as
 a path, automatically creating folders as needed).
 The value can be a Buffer, a String, or a JSON-serializable object.
+Folders (eg. `foo` if something was set to `foo/bar`) cannot contain data.
 
 get(key) → Promise<Buffer>
 
