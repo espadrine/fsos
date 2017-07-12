@@ -65,61 +65,57 @@ var pFsync = promisify(fs.fsync);
 var prmdir = promisify(fs.rmdir);
 
 function set(key, value, options) {
-  return new Promise(function(resolve, reject) {
-    options = options || {}
-    var dir = path.dirname(key);
-    var noMkdir = !!options.noMkdir;
-    var tmpname;
-    var fd;
-    var mode;
-    var automakeDir;
-    if (!noMkdir) {
-      automakeDir = pMkdirp(dir);
-    } else {
-      automakeDir = Promise.resolve();
-    }
-    automakeDir.then(function() {
-      return pStat(key);
-    }).then(function(stats) {
-      mode = stats.mode;
+  options = options || {}
+  var dir = path.dirname(key);
+  var noMkdir = !!options.noMkdir;
+  var tmpname;
+  var fd;
+  var mode;
+  var automakeDir;
+  if (!noMkdir) {
+    automakeDir = pMkdirp(dir);
+  } else {
+    automakeDir = Promise.resolve();
+  }
+  return automakeDir.then(function() {
+    return pStat(key);
+  }).then(function(stats) {
+    mode = stats.mode;
+    return randFileName(dir);
+  }).catch(function(e) {
+    if (e.code === 'ENOENT') {
+      mode = 0x1b6;  // 0b110110110 aka. read/write.
       return randFileName(dir);
-    }).catch(function(e) {
-      if (e.code === 'ENOENT') {
-        mode = 0x1b6;  // 0b110110110 aka. read/write.
-        return randFileName(dir);
-      } else {
-        throw e;
-      }
-    }).then(function(tmp) {
-      // FIXME: retry if the file already exists.
-      tmpname = tmp;
-      return pOpen(tmpname,
-        constants.O_WRONLY | constants.O_EXCL | constants.O_CREAT,
-        mode);
-    }).then(function(fileDescriptor) {
-      fd = fileDescriptor;
-      return pWrite(fd, value);
-    }).then(function() {
-      return pFsync(fd);
-    }).then(function() {
-      return pClose(fd);
-    }).then(function() {
-      return pRename(tmpname, key);
-    }).catch(function(e) {
-      pUnlink(tmpname);
-      throw e;
-    }).then(function() {
-      // Fsync the file's directory.
-      return pOpen(path.dirname(key), constants.O_RDONLY);
-    }).then(function(fileDescriptor) {
-      fd = fileDescriptor;
-      return pFsync(fd);
-    }).then(function() {
-      return pClose(fd);
-    }).then(function() {
-      // Ensure we don't call resolve with a non-null argument.
-      resolve();
-    }).catch(reject);
+    } else {
+      return Promise.reject(e);
+    }
+  }).then(function(tmp) {
+    // FIXME: retry if the file already exists.
+    tmpname = tmp;
+    return pOpen(tmpname,
+      constants.O_WRONLY | constants.O_EXCL | constants.O_CREAT,
+      mode);
+  }).then(function(fileDescriptor) {
+    fd = fileDescriptor;
+    return pWrite(fd, value);
+  }).then(function() {
+    return pFsync(fd);
+  }).then(function() {
+    return pClose(fd);
+  }).then(function() {
+    return pRename(tmpname, key);
+  }).catch(function(e) {
+    return pUnlink(tmpname)
+    .then(function() { return Promise.reject(e); })
+    .catch(function(_) { return Promise.reject(e); })
+  }).then(function() {
+    // Fsync the file's directory.
+    return pOpen(path.dirname(key), constants.O_RDONLY);
+  }).then(function(fileDescriptor) {
+    fd = fileDescriptor;
+    return pFsync(fd);
+  }).then(function() {
+    return pClose(fd);
   });
 }
 

@@ -62,4 +62,4 @@ fsos.set(testFile, 'hello')
 
 .then(function() {
   console.log('done');
-});
+}).catch(function(e) { console.error(e); });
