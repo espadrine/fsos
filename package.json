@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "promise": "~7.0.4",
-    "mkdirp-then": "~1.2.0"
+    "mkdirp": "~0.5.1"
   },
   "engines": { "node": ">=4.1.1" }
 }

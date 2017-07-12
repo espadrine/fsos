@@ -3,8 +3,10 @@ var fs = require('fs');
 var path = require('path');
 var crypto = require('crypto');
 var constants = require('constants');
-var mkdirp = require('mkdirp-then');
-var Promise = require('promise');
+var mkdirp = require('mkdirp');
+if (this.Promise === undefined) {
+  this.Promise = require('promise');
+}
 
 function promisify(func) {
   return function() {
@@ -24,6 +26,7 @@ function promisify(func) {
   };
 }
 
+var pMkdirp = promisify(mkdirp);
 var pReadFile = promisify(fs.readFile);
 var get = pReadFile;
 
@@ -71,7 +74,7 @@ function set(key, value, options) {
     var mode;
     var automakeDir;
     if (!noMkdir) {
-      automakeDir = mkdirp(dir);
+      automakeDir = pMkdirp(dir);
     } else {
       automakeDir = Promise.resolve();
     }
