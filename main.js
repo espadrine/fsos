@@ -18,7 +18,7 @@ function promisify(func) {
       args.push(function (err) {
         if (err !== null) { return reject(err); }
         var rest = Array.prototype.slice.call(arguments, 1);
-        return resolve(rest.length === 1 ? rest[0] : rest);
+        return rest.length === 1 ? resolve(rest[0]) : resolve();
       });
       // Call the callback-based function
       func.apply(self, args);
