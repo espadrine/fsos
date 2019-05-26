@@ -1,12 +1,13 @@
-var assert = require('assert');
+var assert = require('assert').strict;
 var fsos = require('.');
 var fs = require('fs');
 var path = require('path');
 
 var thrownCount = 0;
 var assertPromiseNotThrown = function(e) {
-  console.error(e.stack);
+  //console.error(e);
   assert(false, 'Error thrown:\n' + e.stack);
+  throw e;
 };
 
 // Test with new file.
