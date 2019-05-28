@@ -110,7 +110,7 @@ function set(key, value, options) {
     .catch(function(_) { return Promise.reject(e); })
   }).then(function() {
     // Fsync the file's directory.
-    return pOpen(path.dirname(key), constants.O_WRONLY);
+    return pOpen(path.dirname(key), constants.O_RDONLY);
   }).then(function(fileDescriptor) {
     fd = fileDescriptor;
     return pFsync(fd);
