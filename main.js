@@ -55,6 +55,7 @@ function randFileName(dir) {
     resolve(path.join(dir, '.' + rand));
   });
 }
+const isWin32 = (process.platform === 'win32');
 
 var pOpen = promisify(fs.open);
 var pClose = promisify(fs.close);
@@ -110,7 +111,12 @@ function set(key, value, options) {
     .catch(function(_) { return Promise.reject(e); })
   }).then(function() {
     // Fsync the file's directory.
-    return pOpen(path.dirname(key), constants.O_RDONLY);
+    // In POSIX, directories are read-only; open() throws EISDIR otherwise.
+    // See http://pubs.opengroup.org/onlinepubs/009695399/functions/open.html
+    // On Windows, fsync aka FlushFileBuffers() must have GENERIC_WRITE access.
+    // See https://docs.microsoft.com/en-us/windows/desktop/api/fileapi/nf-fileapi-flushfilebuffers
+    const mode = isWin32? constants.O_WRONLY: constants.O_RDONLY;
+    return pOpen(path.dirname(key), mode);
   }).then(function(fileDescriptor) {
     fd = fileDescriptor;
     return pFsync(fd);

@@ -2,7 +2,10 @@
   "name": "fsos",
   "version": "1.1.5",
   "description": "A file system object storage.",
-  "keywords": ["file", "object storage"],
+  "keywords": [
+    "file",
+    "object storage"
+  ],
   "bugs": {
     "url": "https://github.com/espadrine/fsos/issues",
     "email": "thaddee.tyl@gmail.com"
@@ -21,5 +24,7 @@
     "promise": "~7.0.4",
     "mkdirp": "~0.5.1"
   },
-  "engines": { "node": ">=4.1.1" }
+  "engines": {
+    "node": ">=4.1.1"
+  }
 }
